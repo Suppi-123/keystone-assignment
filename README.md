@@ -2,6 +2,11 @@
 
 A full-stack implementation of the supplied Keystone Commerce assignment.
 
+## Live API
+
+**Hosted API:** https://keystone-assignment.onrender.com/
+
+**Health Check:** https://keystone-assignment.onrender.com/health
 ## What it does
 
 - Create products and warehouse locations.
