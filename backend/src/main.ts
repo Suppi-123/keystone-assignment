@@ -8,7 +8,10 @@ async function bootstrap() {
 
   // Allow React frontend to call the backend
   app.enableCors({
-    origin: 'http://localhost:5173',
+    origin: [
+      'http://localhost:5173',
+      'https://keystone-assignment-1.onrender.com',
+    ],
   });
 
   app.useGlobalPipes(
