@@ -194,25 +194,4 @@ The integration suite covers:
 9. changed payload with same key
 10. concurrent reservation safety
 
-## Important interview explanation
 
-### Why can two users not oversell?
-
-The checkout reservation is performed inside a PostgreSQL transaction. Before changing inventory, the service executes `SELECT ... FOR UPDATE` on that inventory row. The second transaction waits until the first transaction commits, then re-checks `stock - reserved`. If there is no longer enough stock, it cannot reserve it.
-
-### Why is idempotency needed?
-
-A client can retry a request after a network timeout even though the first request already succeeded. The unique idempotency key lets the server return the original checkout instead of reserving stock a second time.
-
-### Why are payment transitions transactional?
-
-Inventory and checkout state must change together. A successful payment updates both stock and reservation in one transaction; failure/expiry releases the reservation and updates the checkout state in the same transaction.
-
-## Submission checklist
-
-- [ ] Push source code to GitHub
-- [ ] Add hosted API URL to README
-- [ ] Confirm frontend works against hosted API or document local API use
-- [ ] Run all automated tests
-- [ ] Verify Docker build
-- [ ] Review concurrency, idempotency, location selection, and state transitions before the walkthrough
