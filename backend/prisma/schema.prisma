@@ -1,0 +1,79 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum CheckoutStatus {
+  RESERVED
+  PAID
+  FAILED
+  ABANDONED
+  EXPIRED
+}
+
+model Product {
+  id        String      @id @default(uuid())
+  name      String
+  createdAt DateTime    @default(now())
+  inventory Inventory[]
+  checkouts Checkout[]
+}
+
+model Location {
+  id           String        @id @default(uuid())
+  name         String
+  city         String
+  state        String
+  active       Boolean       @default(true)
+  priority     Int           @default(100)
+  inventory    Inventory[]
+  serviceZones ServiceZone[]
+  checkouts    Checkout[]
+  createdAt    DateTime      @default(now())
+}
+
+model Inventory {
+  id         String   @id @default(uuid())
+  productId  String
+  locationId String
+  stock      Int      @default(0)
+  reserved   Int      @default(0)
+  product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  location   Location @relation(fields: [locationId], references: [id], onDelete: Cascade)
+
+  @@unique([productId, locationId])
+}
+
+model ServiceZone {
+  id         String   @id @default(uuid())
+  locationId String
+  pincode    String
+  location   Location @relation(fields: [locationId], references: [id], onDelete: Cascade)
+
+  @@unique([locationId, pincode])
+  @@index([pincode])
+}
+
+model Checkout {
+  id             String         @id @default(uuid())
+  productId      String
+  locationId     String
+  quantity       Int
+  deliveryPincode String
+  deliveryCity    String?
+  deliveryState   String?
+  status         CheckoutStatus @default(RESERVED)
+  idempotencyKey String         @unique
+  expiresAt      DateTime?
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  product        Product        @relation(fields: [productId], references: [id], onDelete: Restrict)
+  location       Location       @relation(fields: [locationId], references: [id], onDelete: Restrict)
+
+  @@index([status, expiresAt])
+  @@index([productId])
+}

@@ -1,0 +1,26 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: keystone_inventory
+    ports: ["5432:5432"]
+    volumes: ["postgres_data:/var/lib/postgresql/data"]
+  api:
+    build: ./backend
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/keystone_inventory?schema=public
+      PORT: 3000
+      RETRY_WINDOW_MINUTES: 15
+      CORS_ORIGIN: http://localhost:8080
+    depends_on: [postgres]
+    ports: ["3000:3000"]
+  web:
+    build: ./frontend
+    environment:
+      VITE_API_URL: http://localhost:3000
+    depends_on: [api]
+    ports: ["8080:80"]
+volumes:
+  postgres_data:
